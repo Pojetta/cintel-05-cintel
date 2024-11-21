@@ -1,10 +1,15 @@
-from shiny import reactive, render
-from shiny.express import ui
 import random
 from datetime import datetime
-from faicons import icon_svg
 from collections import deque
+from shiny import reactive, render
+from shiny.express import ui
+from shinywidgets import render_plotly
 import pandas as pd
+import plotly.express as px
+from scipy import stats
+from faicons import icon_svg
+
+# https://fontawesome.com/v4/cheatsheet/
 
 # --------------------------------------------
 # First, set a constant UPDATE INTERVAL for all live data
@@ -13,7 +18,7 @@ import pandas as pd
 # --------------------------------------------
 
 
-UPDATE_INTERVAL_SECS: int = 1
+UPDATE_INTERVAL_SECS: int = 3
 
 # --------------------------------------------
 # Initialize a REACTIVE VALUE with a common data structure
@@ -66,7 +71,7 @@ def reactive_calc_combined():
 # Set fillable to True to use the whole page width for the UI
 
 # Page Options
-ui.page_opts(title="PyShiny Express: Live Data (Basic)", fillable=True)
+ui.page_opts(title="PyShiny Express: Live Data")
 
 # Sidebar is typically used for user interaction/information
 # Note the with statement to create the sidebar followed by a colon
@@ -75,7 +80,7 @@ ui.page_opts(title="PyShiny Express: Live Data (Basic)", fillable=True)
 with ui.sidebar(open="open"):
     ui.h2("Antarctic Explorer", class_="text-center")
     ui.p(
-        "A demonstration of real-time temperature readings in Antarctica.",
+        "A demonstration of real-time temperature readings.",
         class_="text-center",
     )
 
@@ -95,35 +100,97 @@ with ui.sidebar(open="open"):
 
 
 with ui.layout_columns():
-    with ui.value_box(
-        showcase=icon_svg("sun"),
-        theme="bg-gradient-pink-orange",
+    with ui.card():
+        ui.h2("Meanwhile, in Antarctica...")
+
+        with ui.layout_column_wrap(width=1 / 2):
+             with ui.value_box(
+                theme=ui.value_box_theme(fg="#0B538E"),
+    ):
+        
+                "At This Very Moment"
+
+                @render.text
+                def display_time():
+                    """Get the latest reading and return a timestamp string"""
+                    deque_snapshot, df, latest = reactive_calc_combined()
+                    return f"{latest['timestamp']}"
+
+                "(central standard time)"
+
+        
+             with ui.value_box(
+                showcase=icon_svg("snowflake"),
+                theme=ui.value_box_theme(fg = "#e6f2fd", bg="#0B538E"),
+                showcase_layout="top right" 
     ):
 
-        "Current Temperature"
+                "Current Temperature"
 
-        @render.text
-        def display_temp():
-            """Get the latest reading and return a temperature string"""
-            deque_snapshot, df, latest = reactive_calc_combined()
-            return f"{latest['temp']} C"
+                @render.text
+                def display_temp():
+                    """Get the latest reading and return a temperature string"""
+                    deque_snapshot, df, latest = reactive_calc_combined()
+                    return f"{latest['temp']} C"
 
-        "warmer than usual"
-
-    with ui.card(full_screen=True):
-        ui.card_header("Current Date and Time")
-
-        @render.text
-        def display_time():
-            """Get the latest reading and return a timestamp string"""
-            deque_snapshot, df, latest = reactive_calc_combined()
-            return f"{latest['timestamp']}"
+                "Colder than usual"    
 
 
 with ui.layout_columns():
-    with ui.card():
-        ui.card_header("Current Data (placeholder only)")
+    #with ui.card(full_screen=True, min_height="40%"):
+    with ui.card(full_screen = True):
+        ui.card_header("Most Recent Readings")
 
-with ui.layout_columns():
-    with ui.card():
-        ui.card_header("Current Chart (placeholder only)")
+        @render.data_frame
+        def display_df():
+            """Get the latest reading and return a dataframe with current readings"""
+            deque_snapshot, df, latest = reactive_calc_combined()
+
+            # Rename columns before displaying
+            df = df.rename(columns={"temp": "Temperature (°C)", "timestamp": "Time"})
+            
+            # Use maximum width
+            pd.set_option('display.width', None)       
+            return render.DataGrid( df,width="100%")        
+
+
+with ui.card():
+    ui.card_header("Current Trend")
+    
+    @render.plotly
+    def display_plot():
+        # Fetch from the reactive calc function
+        deque_snapshot, df, latest = reactive_calc_combined()
+
+        # Ensure the DataFrame is not empty before plotting
+        if df.empty:
+            return "No data available for plotting."
+
+        # Convert the 'timestamp' column to datetime for better plotting
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
+
+        # Create scatter plot for readings
+        fig = px.scatter(df,
+                         x="timestamp",
+                         y="temp",
+                         title="Temperature Readings with Regression Line",
+                         labels={"temp": "Temperature (°C)", "timestamp": "Time"},
+                         color_discrete_sequence=["darkslategray"])
+
+        # Linear regression - we need to get a list of the
+        # Independent variable x values (time) and the
+        # Dependent variable y values (temp)
+        # Using time in seconds for more accurate regression
+        x_vals = (df["timestamp"] - df["timestamp"].min()).dt.total_seconds()
+        y_vals = df["temp"]
+
+        slope, intercept, r_value, p_value, std_err = stats.linregress(x_vals, y_vals)
+        df['best_fit_line'] = [slope * x + intercept for x in x_vals]
+
+        # Add the regression line to the figure
+        fig.add_scatter(x=df["timestamp"], y=df['best_fit_line'], mode='lines', name='Regression Line')
+
+        # Update layout as needed to customize further
+        fig.update_layout(xaxis_title="Time", yaxis_title="Temperature (°C)")
+
+        return fig
