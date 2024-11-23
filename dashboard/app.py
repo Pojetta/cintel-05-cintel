@@ -3,7 +3,6 @@ from datetime import datetime
 from collections import deque
 from shiny import reactive, render
 from shiny.express import ui
-from shinywidgets import render_plotly
 import pandas as pd
 import plotly.express as px
 from scipy import stats
@@ -157,7 +156,7 @@ with ui.layout_columns():
 with ui.card():
     ui.card_header("Current Trend")
     
-    @render.plotly
+    @render.plot
     def display_plot():
         # Fetch from the reactive calc function
         deque_snapshot, df, latest = reactive_calc_combined()
