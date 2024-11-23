@@ -31,7 +31,7 @@ def reactive_calc_combined():
     df = pd.DataFrame(deque_snapshot)
     latest = new_dictionary_entry
     return deque_snapshot, df, latest
-
+  
 # Shiny UI
 ui.page_opts(title="PyShiny Express: Live Data")
 
@@ -45,20 +45,38 @@ with ui.sidebar(open="open"):
     ui.a("PyShiny", href="https://shiny.com", target="_blank")
 
 with ui.layout_columns():
+    ui.h3("Meanwhile, in Antarctica...", class_="text-center")
+
+with ui.layout_columns(col_widths=(8,4)):
+    with ui.value_box(theme=ui.value_box_theme(fg="#0B538E"), class_="text-center"):
+        ui.h6("AT THIS VERY MOMENT")
+
+        ui.h3("According to this clock in Missouri")
+
+        ui.p("(which is approximately 6 to 18 hours behind Antarctica)")
+    
+    with ui.value_box(theme=ui.value_box_theme(fg="#0B538E"),class_="text-center"): 
+        @render.text
+        def display_date():
+            deque_snapshot, df, latest = reactive_calc_combined()
+            timestamp = datetime.strptime(latest['timestamp'], "%Y-%m-%d %H:%M:%S")
+            date = timestamp.strftime("%m-%d-%Y")
+            return date
+
+        @render.text
+        def display_time():
+            deque_snapshot, df, latest = reactive_calc_combined()
+            timestamp = datetime.strptime(latest['timestamp'], "%Y-%m-%d %H:%M:%S")
+            time = timestamp.strftime("%I:%M:%S %p")
+            return time
+        
+        ui.p("central standard")
+
+with ui.layout_columns(class_="text-center"):
     with ui.card():
-        ui.h2("Meanwhile, in Antarctica...")
-
+        ui.h2("It's cold as F*CK!")
+        
         with ui.layout_column_wrap(width=1 / 2):
-            with ui.value_box(theme=ui.value_box_theme(fg="#0B538E")):
-                "At This Very Moment"
-
-                @render.text
-                def display_time():
-                    deque_snapshot, df, latest = reactive_calc_combined()
-                    return f"{latest['timestamp']}"
-
-                "(central standard time)"
-
             with ui.value_box(
                 showcase=icon_svg("snowflake"),
                 theme=ui.value_box_theme(fg="#e6f2fd", bg="#0B538E"),
@@ -66,27 +84,31 @@ with ui.layout_columns():
                 "Current Temperature"
 
                 @render.text
-                def display_temp():
+                def display_temp_c():
                     deque_snapshot, df, latest = reactive_calc_combined()
                     return f"{latest['temp']} C"
 
-                "Colder than usual"
+                ui.h6("In Celsius", class_="text-center")
+            
+            with ui.value_box(
+                showcase=icon_svg("snowflake"),
+                theme=ui.value_box_theme(fg="#0B538E", bg="#f01414"),
+                showcase_layout="top right"):
 
-with ui.layout_columns():
-    with ui.card(full_screen=True):
-        ui.card_header("Most Recent Readings")
+                "Current Temperature"
 
-        @render.data_frame
-        def display_df():
-            deque_snapshot, df, latest = reactive_calc_combined()
-
-            # Rename columns
-            df = df.rename(columns={"temp": "Temperature (°C)", "timestamp": "Time"})
-            pd.set_option('display.width', None)  # Use max width for display
-            return render.DataGrid(df, width="100%")
+                @render.text
+                def display_temp_f():
+                    deque_snapshot, df, latest = reactive_calc_combined()
+                    # Convert temperature from Celsius to Fahrenheit
+                    temp_celsius = latest['temp']
+                    temp_fahrenheit = (temp_celsius * 9/5) + 32
+                    return f"{temp_fahrenheit:.1f} °F"
+                
+                ui.h6("And in America", class_="text-center")
 
 with ui.card():
-    ui.card_header("Current Trend")
+    ui.card_header("Current Trend: Fluctuations that Defy All Logic")
 
     @render_plotly
     def display_plot():
@@ -103,7 +125,7 @@ with ui.card():
         fig = px.scatter(df,
                          x="timestamp",
                          y="temp",
-                         title="Temperature Readings with Regression Line",
+                         title="Regression Line on Verge of Meltdown",
                          labels={"temp": "Temperature (°C)", "timestamp": "Time"},
                          color_discrete_sequence=["blue"])
 
@@ -119,3 +141,4 @@ with ui.card():
         # Customize layout
         fig.update_layout(xaxis_title="Time", yaxis_title="Temperature (°C)")
         return fig
+
