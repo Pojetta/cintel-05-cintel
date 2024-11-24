@@ -44,16 +44,12 @@ with ui.sidebar(open="open"):
     ui.a("GitHub App", href="https://pojetta.github.io/cintel-05-cintel/", target="_blank")
     ui.a("PyShiny", href="https://shiny.com", target="_blank")
 
-with ui.layout_columns():
-    ui.h3("Meanwhile, in Antarctica...", class_="text-center")
-
 with ui.layout_columns(col_widths=(8,4)):
     with ui.value_box(theme=ui.value_box_theme(fg="#0B538E"), class_="text-center"):
-        ui.h6("AT THIS VERY MOMENT")
-
-        ui.h3("According to this clock in Missouri")
-
-        ui.p("(which is approximately 6 to 18 hours behind Antarctica)")
+        ui.p("")
+        ui.p("We're in Missouri")
+        ui.p("")
+        
     
     with ui.value_box(theme=ui.value_box_theme(fg="#0B538E"),class_="text-center"): 
         @render.text
@@ -70,11 +66,13 @@ with ui.layout_columns(col_widths=(8,4)):
             time = timestamp.strftime("%I:%M:%S %p")
             return time
         
-        ui.p("central standard")
+        ui.h6("And so is our clock.")
 
 with ui.layout_columns(class_="text-center"):
     with ui.card():
-        ui.h2("It's cold as F*CK!")
+        ui.h3("Meanwhile, in Antarctica...", class_="text-center")
+        
+        ui.p("(which is approximately 6 to 18 hours ahead of Missouri)", class_="text-center")
         
         with ui.layout_column_wrap(width=1 / 2):
             with ui.value_box(
@@ -105,10 +103,12 @@ with ui.layout_columns(class_="text-center"):
                     temp_fahrenheit = (temp_celsius * 9/5) + 32
                     return f"{temp_fahrenheit:.1f} °F"
                 
-                ui.h6("And in America", class_="text-center")
+                ui.h6("In America", class_="text-center")
+
+        ui.h2("It's cold as F*CK!")    
 
 with ui.card():
-    ui.card_header("Current Trend: Fluctuations that Defy All Logic")
+    ui.card_header("CURRENT TREND: FLUCTUATIONS DEFY ALL LOGIC", style="color: #f01414; background-color: ##0B538E; font-size: 20px; font-weight: 200;")
 
     @render_plotly
     def display_plot():
@@ -127,7 +127,7 @@ with ui.card():
                          y="temp",
                          title="Regression Line on Verge of Meltdown",
                          labels={"temp": "Temperature (°C)", "timestamp": "Time"},
-                         color_discrete_sequence=["blue"])
+                         color_discrete_sequence=["white"])
 
         # Linear regression
         x_vals = (df["timestamp"] - df["timestamp"].min()).dt.total_seconds()
@@ -136,9 +136,27 @@ with ui.card():
         df['best_fit_line'] = [slope * x + intercept for x in x_vals]
 
         # Add regression line
-        fig.add_scatter(x=df["timestamp"], y=df['best_fit_line'], mode='lines', name='Regression Line')
+        fig.add_scatter(x=df["timestamp"], y=df['best_fit_line'], mode='lines')
 
-        # Customize layout
-        fig.update_layout(xaxis_title="Time", yaxis_title="Temperature (°C)")
+        # Update the title properties: center and make it larger
+        fig.update_layout(
+            title={
+            'text': "Regression line on verge of meltdown!",
+            'font': {'size': 16, 'color': 'black'}, 
+            'x': 0.5, 
+            'xanchor': 'center', 
+            },   
+
+            xaxis_title="Time",
+            yaxis_title="Temperature (°C)",
+            xaxis=dict(tickfont=dict(size=14, color='black')),
+            yaxis=dict(tickfont=dict(size=14, color='black')),
+            paper_bgcolor="#e6f2fd",  # Background color for the entire figure
+            plot_bgcolor="#0B538E"    # Background color for the plot area
+        )
+
         return fig
+    
+
+
 
