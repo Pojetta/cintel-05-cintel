@@ -50,7 +50,6 @@ with ui.layout_columns(col_widths=(8,4)):
         ui.p("We're in Missouri")
         ui.p("")
         
-    
     with ui.value_box(theme=ui.value_box_theme(fg="#0B538E"),class_="text-center"): 
         @render.text
         def display_date():
@@ -79,6 +78,7 @@ with ui.layout_columns(class_="text-center"):
                 showcase=icon_svg("snowflake"),
                 theme=ui.value_box_theme(fg="#e6f2fd", bg="#0B538E"),
                 showcase_layout="top right"):
+                
                 "Current Temperature"
 
                 @render.text
@@ -116,7 +116,7 @@ with ui.card():
 
         # Ensure DataFrame is not empty
         if df.empty:
-            return ui.p("No data available for plotting.")  # UI element for message
+            return ui.p("No data available for plotting.")  
 
         # Convert timestamp to datetime
         df["timestamp"] = pd.to_datetime(df["timestamp"])
