@@ -1,7 +1,5 @@
 # cintel-05-cintel
 
-# cintel-04-local
-
 ### Configure Git 
 ```
 git config --global user.name "Your Name"
@@ -65,7 +63,7 @@ shiny run --reload --launch-browser penguins/app.py
 shiny static-assets remove
 ```
 ```
-shinylive export penguins docs
+shinylive export dashboard docs
 ```
 
 ### Serve the App
@@ -74,7 +72,7 @@ python3 -m http.server --directory docs --bind localhost 8008
 ```
 
 ### Add a Custom Favicon
-Add your own custom favicon (the little icon that appears in the web browser tab) next to the title. Try https://favicon.io/Links to an external site. and create a favicon.
+Add your own custom favicon (the little icon that appears in the web browser tab) next to the title. Try https://favicon.io/ 
 
 Download the zip file and extract the files. Take just the favicon.ico file and paste it into your docs folder. Two changes are required:
 
