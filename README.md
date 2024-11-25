@@ -74,9 +74,9 @@ python3 -m http.server --directory docs --bind localhost 8008
 ### Add a Custom Favicon
 Add your own custom favicon (the little icon that appears in the web browser tab) next to the title. Try https://favicon.io/ 
 
-Download the zip file and extract the files. Take just the favicon.ico file and paste it into your docs folder. Two changes are required:
+Download the zip file and extract the files. Take just the favicon.ico file and paste it into your docs folder. 
 
-Confirm there is a favicon.ico in your docs folder. Edit docs/index.html - Just below the title line, add the following link tag like so. This code is the same for all of us - only the favicon appearance is different. If your favicon.ico has a different name or path, let VS Code help you provide the correct path.
+```
+<link rel="icon" type="image/x-icon" href="./favicon.ico">
+```
 
-<title>PyShiny Penguins</title>
-END

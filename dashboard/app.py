@@ -83,10 +83,6 @@ with ui.layout_columns(col_widths=(8,4)):
         
         ui.h6("CST")
 
-        
- 
-
-
 with ui.layout_columns(class_="text-center"):
     with ui.card():
         ui.h3("Meanwhile, in Antarctica...", class_="text-center")
@@ -144,13 +140,12 @@ with ui.card(full_screen = True, min_height="40%", style="background-color: #e6f
         df = df[["Time", "Temperature (°C)"]]  # Reorder columns
 
         pd.set_option('display.width', None)       
-        return render.DataGrid( df,width="100%")
-    
+        return render.DataGrid( df,width="100%")  
 
 with ui.card():
     ui.card_header(
         "CURRENTlY: SPASMODIC FLUCTUATIONS DEFY ALL LOGIC",
-        style="font-family: monospace; font-weight: bold;font-size: 20px; color: #f01414;"
+        style="font-family: monospace;font-size: 18px; color: #f01414;"
     ) 
 
     with ui.div(style="overflow: hidden;"):
@@ -201,7 +196,6 @@ with ui.card():
             )
             return fig
         
-   
     ui.HTML(
         '''
         <div style="text-align: center;">
